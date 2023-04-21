@@ -7,6 +7,7 @@ type Node = {
   right: Node | null;
   x: number;
   y: number;
+  highlight: boolean;
 };
 
 function App() {
@@ -23,12 +24,15 @@ function App() {
         const rect = canvas.getBoundingClientRect();
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
-
-        console.log("clicked");
-
         
         const node = findClickedNode(binaryTree, x, y);
         console.log(node)
+
+        node.forEach((n)=>{
+          n.highlight= true
+        })
+
+        redrawBinaryTree()
       }
     }
 
@@ -40,9 +44,9 @@ function App() {
   }, [binaryTree]);
 
   
-  function findClickedNode(node: Node | null, x: number, y: number): Node | null {
+  function findClickedNode(node: Node | null, x: number, y: number): Node[] {
     if (!node) {
-      return null;
+      return [];
     }
 
     const radius = 20
@@ -58,22 +62,22 @@ function App() {
   
     // If the distance is less than the radius of the node's circle, the click was inside the circle.
     if (distance <= radius) {
-      return node;
+      return [node];
     }
   
     // Recursively check if the click was inside any of the node's children.
     const left = findClickedNode(node.left, x, y);
-    if (left) {
-      return left;
+    if (left.length>0) {
+      return [node, ...left];
     }
   
     const right = findClickedNode(node.right, x, y);
-    if (right) {
-      return right;
+    if (right.length>0) {
+      return [node, ...right];
     }
   
     // If the click was not inside any of the nodes or their children, return null.
-    return null;
+    return [];
   }
   
 
@@ -108,12 +112,23 @@ function App() {
     }
   };
 
+  const redrawBinaryTree = ()=>{
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const context = canvas.getContext("2d");
+      if (context) {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        drawBinaryTree(context, binaryTree, canvas.width / 2, 50, 80, 80);
+      }
+    }
+  }
+
   const buildBinaryTree = (values: number[], i: number = 0): Node | null => {
     if (i >= values.length || values[i] === null) {
       return null;
     }
 
-    const node: Node = { value: values[i], left: null, right: null, x:0, y:0 };
+    const node: Node = { value: values[i], left: null, right: null, x:0, y:0, highlight: false};
     node.left = buildBinaryTree(values, 2 * i + 1);
     node.right = buildBinaryTree(values, 2 * i + 2);
 
@@ -139,11 +154,19 @@ function App() {
     const centerX = x + radius;
     const centerY = y + radius;
 
+    context.lineWidth = 1
+
     context.beginPath();
     context.fillStyle = "white";
-    context.arc(centerX, centerY, radius, 0, 2 * Math.PI);
     context.strokeStyle = "black";
+
+    if(node.highlight){
+      context.fillStyle = "blue";
+    }
+    context.arc(centerX, centerY, radius, 0, 2 * Math.PI);
     context.stroke();
+    context.fill();
+
     context.fillStyle = "black";
     context.fillText(node.value.toString(), centerX, centerY);
 
@@ -154,10 +177,15 @@ function App() {
       context.beginPath();
       context.moveTo(centerX, centerY + radius);
       context.lineTo(leftX, leftY);
+
+      if(node.left.highlight){
+        context.strokeStyle = "blue"
+      }
       context.stroke();
 
       drawBinaryTree(context, node.left, x - dx, y + dy, dx / 2, dy);
     }
+
     if (node.right !== null) {
       const rightX = x + dx + radius;
       const rightY = y + dy;
@@ -165,10 +193,14 @@ function App() {
       context.beginPath();
       context.moveTo(centerX, centerY + radius);
       context.lineTo(rightX, rightY);
+      if(node.right.highlight){
+        context.strokeStyle = "blue"
+      }
       context.stroke();
 
       drawBinaryTree(context, node.right, x + dx, y + dy, dx / 2, dy);
     }
+
   };
 
   return (
