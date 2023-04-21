@@ -1,16 +1,81 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import "./App.css";
 
 type Node = {
   value: number;
   left: Node | null;
   right: Node | null;
+  x: number;
+  y: number;
 };
 
 function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [inputArray, setInputArray] = useState<number[]>([]);
   const [inputValue, setInputValue] = useState("");
+  const [binaryTree, setBinaryTree] = useState<Node | null>(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+
+    function handleClick(event: MouseEvent) {
+      if (canvas) {
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        console.log("clicked");
+
+        
+        const node = findClickedNode(binaryTree, x, y);
+        console.log(node)
+      }
+    }
+
+    if (canvas) canvas.addEventListener("click", handleClick);
+
+    return () => {
+      if (canvas) canvas.removeEventListener("click", handleClick);
+    };
+  }, [binaryTree]);
+
+  
+  function findClickedNode(node: Node | null, x: number, y: number): Node | null {
+    if (!node) {
+      return null;
+    }
+
+    const radius = 20
+  
+    // Calculate the coordinates of the center of the node's circle.
+    const centerX = node.x + radius;
+    const centerY = node.y + radius;
+  
+    // Calculate the distance between the click location and the center of the node's circle.
+    const dx = x - centerX;
+    const dy = y - centerY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+  
+    // If the distance is less than the radius of the node's circle, the click was inside the circle.
+    if (distance <= radius) {
+      return node;
+    }
+  
+    // Recursively check if the click was inside any of the node's children.
+    const left = findClickedNode(node.left, x, y);
+    if (left) {
+      return left;
+    }
+  
+    const right = findClickedNode(node.right, x, y);
+    if (right) {
+      return right;
+    }
+  
+    // If the click was not inside any of the nodes or their children, return null.
+    return null;
+  }
+  
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(event.target.value);
@@ -29,7 +94,8 @@ function App() {
     setInputArray(values);
 
     // Build the binary tree
-    const binaryTree = buildBinaryTree(values);
+    const newBinaryTree = buildBinaryTree(values);
+    setBinaryTree(newBinaryTree)
 
     // Draw the binary tree on the canvas
     const canvas = canvasRef.current;
@@ -37,7 +103,7 @@ function App() {
       const context = canvas.getContext("2d");
       if (context) {
         context.clearRect(0, 0, canvas.width, canvas.height);
-        drawBinaryTree(context, binaryTree, canvas.width / 2, 50, 80, 80);
+        drawBinaryTree(context, newBinaryTree, canvas.width / 2, 50, 80, 80);
       }
     }
   };
@@ -47,7 +113,7 @@ function App() {
       return null;
     }
 
-    const node: Node = { value: values[i], left: null, right: null };
+    const node: Node = { value: values[i], left: null, right: null, x:0, y:0 };
     node.left = buildBinaryTree(values, 2 * i + 1);
     node.right = buildBinaryTree(values, 2 * i + 2);
 
@@ -65,6 +131,9 @@ function App() {
     if (node === null) {
       return;
     }
+
+    node.x = x
+    node.y = y
 
     const radius = 20;
     const centerX = x + radius;
