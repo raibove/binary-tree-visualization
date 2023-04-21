@@ -114,7 +114,7 @@ function App() {
       const context = canvas.getContext("2d");
       if (context) {
         context.clearRect(0, 0, canvas.width, canvas.height);
-        drawBinaryTree(context, newBinaryTree, canvas.width / 2, 50, 80, 80);
+        drawBinaryTree(context, newBinaryTree, canvas.width / 2, 50, 180, 80);
       }
     }
   };
@@ -125,7 +125,7 @@ function App() {
       const context = canvas.getContext("2d");
       if (context) {
         context.clearRect(0, 0, canvas.width, canvas.height);
-        drawBinaryTree(context, binaryTree, canvas.width / 2, 50, 80, 80);
+        drawBinaryTree(context, binaryTree, canvas.width / 2, 50, 180, 80);
       }
     }
   };
@@ -164,7 +164,7 @@ function App() {
     node.x = x;
     node.y = y;
 
-    const radius = 20;
+    const radius = 15;
     const centerX = x + radius;
     const centerY = y + radius;
 
@@ -228,7 +228,11 @@ function App() {
         <button type="submit" onClick={handleSubmit}>
           Submit
         </button>
-        <canvas ref={canvasRef} width={600} height={400} />
+        <canvas
+          ref={canvasRef}
+          width={window.innerWidth}
+          height={window.innerHeight}
+        />
       </div>
     </div>
   );
