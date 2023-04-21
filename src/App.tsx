@@ -14,25 +14,26 @@ function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [inputArray, setInputArray] = useState<number[]>([]);
   const [inputValue, setInputValue] = useState("");
-  const [binaryTree, setBinaryTree] = useState<Node | null>(null)
+  const [binaryTree, setBinaryTree] = useState<Node | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
 
     function handleClick(event: MouseEvent) {
       if (canvas) {
+        resetHighlight(binaryTree);
+
         const rect = canvas.getBoundingClientRect();
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
-        
+
         const node = findClickedNode(binaryTree, x, y);
-        console.log(node)
 
-        node.forEach((n)=>{
-          n.highlight= true
-        })
+        node.forEach((n) => {
+          n.highlight = true;
+        });
 
-        redrawBinaryTree()
+        redrawBinaryTree();
       }
     }
 
@@ -43,43 +44,49 @@ function App() {
     };
   }, [binaryTree]);
 
-  
+  function resetHighlight(node: Node | null) {
+    if (node) {
+      node.highlight = false;
+      resetHighlight(node.left);
+      resetHighlight(node.right);
+    }
+  }
+
   function findClickedNode(node: Node | null, x: number, y: number): Node[] {
     if (!node) {
       return [];
     }
 
-    const radius = 20
-  
+    const radius = 20;
+
     // Calculate the coordinates of the center of the node's circle.
     const centerX = node.x + radius;
     const centerY = node.y + radius;
-  
+
     // Calculate the distance between the click location and the center of the node's circle.
     const dx = x - centerX;
     const dy = y - centerY;
     const distance = Math.sqrt(dx * dx + dy * dy);
-  
+
     // If the distance is less than the radius of the node's circle, the click was inside the circle.
     if (distance <= radius) {
       return [node];
     }
-  
+
     // Recursively check if the click was inside any of the node's children.
     const left = findClickedNode(node.left, x, y);
-    if (left.length>0) {
+    if (left.length > 0) {
       return [node, ...left];
     }
-  
+
     const right = findClickedNode(node.right, x, y);
-    if (right.length>0) {
+    if (right.length > 0) {
       return [node, ...right];
     }
-  
+
     // If the click was not inside any of the nodes or their children, return null.
     return [];
   }
-  
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(event.target.value);
@@ -99,7 +106,7 @@ function App() {
 
     // Build the binary tree
     const newBinaryTree = buildBinaryTree(values);
-    setBinaryTree(newBinaryTree)
+    setBinaryTree(newBinaryTree);
 
     // Draw the binary tree on the canvas
     const canvas = canvasRef.current;
@@ -112,7 +119,7 @@ function App() {
     }
   };
 
-  const redrawBinaryTree = ()=>{
+  const redrawBinaryTree = () => {
     const canvas = canvasRef.current;
     if (canvas) {
       const context = canvas.getContext("2d");
@@ -121,14 +128,21 @@ function App() {
         drawBinaryTree(context, binaryTree, canvas.width / 2, 50, 80, 80);
       }
     }
-  }
+  };
 
   const buildBinaryTree = (values: number[], i: number = 0): Node | null => {
     if (i >= values.length || values[i] === null) {
       return null;
     }
 
-    const node: Node = { value: values[i], left: null, right: null, x:0, y:0, highlight: false};
+    const node: Node = {
+      value: values[i],
+      left: null,
+      right: null,
+      x: 0,
+      y: 0,
+      highlight: false,
+    };
     node.left = buildBinaryTree(values, 2 * i + 1);
     node.right = buildBinaryTree(values, 2 * i + 2);
 
@@ -147,20 +161,20 @@ function App() {
       return;
     }
 
-    node.x = x
-    node.y = y
+    node.x = x;
+    node.y = y;
 
     const radius = 20;
     const centerX = x + radius;
     const centerY = y + radius;
 
-    context.lineWidth = 1
+    context.lineWidth = 1;
 
     context.beginPath();
     context.fillStyle = "white";
     context.strokeStyle = "black";
 
-    if(node.highlight){
+    if (node.highlight) {
       context.fillStyle = "blue";
     }
     context.arc(centerX, centerY, radius, 0, 2 * Math.PI);
@@ -178,8 +192,8 @@ function App() {
       context.moveTo(centerX, centerY + radius);
       context.lineTo(leftX, leftY);
 
-      if(node.left.highlight){
-        context.strokeStyle = "blue"
+      if (node.left.highlight) {
+        context.strokeStyle = "blue";
       }
       context.stroke();
 
@@ -193,14 +207,13 @@ function App() {
       context.beginPath();
       context.moveTo(centerX, centerY + radius);
       context.lineTo(rightX, rightY);
-      if(node.right.highlight){
-        context.strokeStyle = "blue"
+      if (node.right.highlight) {
+        context.strokeStyle = "blue";
       }
       context.stroke();
 
       drawBinaryTree(context, node.right, x + dx, y + dy, dx / 2, dy);
     }
-
   };
 
   return (
