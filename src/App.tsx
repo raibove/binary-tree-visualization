@@ -19,6 +19,13 @@ function App() {
   useEffect(() => {
     const canvas = canvasRef.current;
 
+    const handleResize = () => {
+      if (canvas) {
+        canvas.width = window.innerWidth - 100;
+        redrawBinaryTree();
+      }
+    };
+
     function handleClick(event: MouseEvent) {
       if (canvas) {
         resetHighlight(binaryTree);
@@ -37,10 +44,16 @@ function App() {
       }
     }
 
-    if (canvas) canvas.addEventListener("click", handleClick);
+    if (canvas) {
+      canvas.addEventListener("click", handleClick);
+      window.addEventListener("resize", handleResize);
+    }
 
     return () => {
-      if (canvas) canvas.removeEventListener("click", handleClick);
+      if (canvas) {
+        canvas.removeEventListener("click", handleClick);
+        window.removeEventListener("resize", handleResize);
+      }
     };
   }, [binaryTree]);
 
@@ -218,7 +231,7 @@ function App() {
 
   return (
     <div className="App">
-      <div>
+      <div className="tree-input">
         <input
           type="text"
           value={inputValue}
@@ -230,8 +243,8 @@ function App() {
         </button>
         <canvas
           ref={canvasRef}
-          width={window.innerWidth}
-          height={window.innerHeight}
+          width={window.innerWidth - 100}
+          height={window.innerHeight - 100}
         />
       </div>
     </div>
