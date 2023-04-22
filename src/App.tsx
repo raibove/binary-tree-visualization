@@ -12,7 +12,6 @@ type Node = {
 
 function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [inputArray, setInputArray] = useState<number[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [binaryTree, setBinaryTree] = useState<Node | null>(null);
 
@@ -115,8 +114,6 @@ function App() {
       return;
     }
 
-    setInputArray(values);
-
     // Build the binary tree
     const newBinaryTree = buildBinaryTree(values);
     setBinaryTree(newBinaryTree);
@@ -127,7 +124,7 @@ function App() {
       const context = canvas.getContext("2d");
       if (context) {
         context.clearRect(0, 0, canvas.width, canvas.height);
-        drawBinaryTree(context, newBinaryTree, canvas.width / 2, 50, 180, 80);
+        drawBinaryTree(context, newBinaryTree, canvas.width / 2, 50, 80, 80);
       }
     }
   };
@@ -138,7 +135,7 @@ function App() {
       const context = canvas.getContext("2d");
       if (context) {
         context.clearRect(0, 0, canvas.width, canvas.height);
-        drawBinaryTree(context, binaryTree, canvas.width / 2, 50, 180, 80);
+        drawBinaryTree(context, binaryTree, canvas.width / 2, 50, 80, 80);
       }
     }
   };
@@ -244,7 +241,7 @@ function App() {
         <canvas
           ref={canvasRef}
           width={window.innerWidth - 100}
-          height={window.innerHeight - 100}
+          height={window.innerHeight - 150}
         />
       </div>
     </div>

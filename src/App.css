@@ -1,3 +1,8 @@
 .tree-input{
     margin: 20px;
 }
+
+.tree-input input{
+    padding: 10px;
+    margin: 10px;
+}
